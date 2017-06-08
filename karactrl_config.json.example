@@ -1,0 +1,9 @@
+{
+  "log_level": 10,
+  "http_server_port": 8080,
+  "serial": {
+    "port": "/dev/ttyUSB0",
+    "baudrate": 57600
+  },
+  "tornado_debug": 1
+}
