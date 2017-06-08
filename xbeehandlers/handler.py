@@ -19,19 +19,16 @@ class handler(LoggerMixin):
         super().__init__(*args, **kwargs)
         self.port = port
         self.xb = ZigBee(
-            port,
+            self.port,
             callback=self.xbee_callback,
             error_callback=self.error_callback,
             escaped=False
         )
-        try:
-            atexit.register(self.quit)
-        except Exception as e:
-            self.logger.exception("atexit threw up")
         self.discover_nodes()
 
     @log_exceptions
     def xbee_callback(self, *args, **kwargs):
+        print("!!! WOOOF!!!!")
         self.logger.debug("args: {} kwargs: {}", args, kwargs)
         packet = args[0]
 
@@ -72,10 +69,12 @@ class handler(LoggerMixin):
     @log_exceptions
     def quit(self, *args, **kwargs):
         self.xb.halt()
+        self.port.close()
 
     @log_exceptions
     def discover_nodes(self):
-        self.xb.at(command='ND')
+        self.logger.debug("Calling ND")
+        self.xb.at(command=b'ND')
 
     @log_exceptions
     def ping_nodes(self):

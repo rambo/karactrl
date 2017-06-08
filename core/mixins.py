@@ -11,6 +11,20 @@ from zmq.eventloop.zmqstream import ZMQStream
 from .decorators import log_exceptions
 
 
+class ControllerMixin(object):
+    """Mixin to grab the controller and logger references from kwargs"""
+
+    def __init__(self, application, request, *args, **kwargs):
+        self.controller = kwargs.pop('controller')
+        # self.controller.active_ws_controllers.append(self)
+        self.logger = self.controller.logger
+        self.logger.debug("Initializing {}".format(repr(self)))
+        super().__init__(application, request, **kwargs)
+
+    def reload(self, *args, **kwargs):
+        pass
+
+
 class ReloadMixin(object):
     """Base mixin for everything implementing reload method so that we can call super on the mixins"""
 
@@ -32,10 +46,10 @@ class LoggerMixin(ReloadMixin):
 
     def __init__(self, *args, **kwargs):
         """Init ensures required parameters are present"""
-        loggername = kwargs.pop('logger_name', None)
-        if not loggername:
+        self.logger_name = kwargs.pop('logger_name', None)
+        if not self.logger_name:
             raise RuntimeError('"logger_name" must be provided to __init__ when using LoggerMixin')
-        self.logger = logging.getLogger(loggername)
+        self.logger = logging.getLogger(self.logger_name)
         super(LoggerMixin, self).__init__(*args, **kwargs)
 
     def reload(self, *args, **kwargs):

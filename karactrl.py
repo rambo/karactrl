@@ -1,11 +1,25 @@
 #!/usr/bin/env python3
 """Server to talk to xbee radios to control the linear actuators and to web client"""
+import os
+
 import serial
+import tornado.web
 
 from core import main
 from core.decorators import log_exceptions
-from core.mixins import ConfigMixin, TimersMixin, ZMQMixin
+from core.mixins import ConfigMixin, ControllerMixin, TimersMixin, ZMQMixin
 from xbeehandlers import xbee_handler
+
+template_root = os.path.join(os.path.dirname(__file__), 'templates')
+
+
+class MainHandler(ControllerMixin, tornado.web.RequestHandler):
+    """Returns our index.html, rendered via template engine"""
+
+    def get(self):
+        self.render(
+            "index.html",
+        )
 
 
 class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
@@ -32,11 +46,18 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
     @log_exceptions
     def reload(self, *args, **kwargs):
         super().reload(*args, **kwargs)
+        if self.xbeehandler:
+            self.xbeehandler.quit()
         self.serialport = serial.Serial(**self.config['serial'])
         self.xbeehandler = xbee_handler(
             self.serialport,
             logger_name=self.logger_name
         )
+        self.ws_app = tornado.web.Application([
+            (r'/', MainHandler, {'controller': self}),
+        ], template_path=template_root, debug=self.config['tornado_debug'])
+        self.logger.info("Binding to port %d" % self.config['http_server_port'])
+        self.ws_app.listen(self.config['http_server_port'])
 
     @log_exceptions
     def cleanup(self, *args, **kwargs):
