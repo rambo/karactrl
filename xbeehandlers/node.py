@@ -10,6 +10,8 @@ class XbeeNode(LoggerMixin):
     short_addr = None
     long_addr = None
     xb = None  # xbee instance
+    rx_callbacks = []
+    alive = True
 
     def __init__(self, xbee, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -18,6 +20,12 @@ class XbeeNode(LoggerMixin):
         # TODO: autodiscover this if not given
         self.long_addr = kwargs['long_addr']
         self.node_identifier = kwargs['node_identifier']
+
+    @log_exceptions
+    def rx(self, packet, *args):
+        """Received packet, fire the callbacks"""
+        for cb in self.rx_callbacks:
+            cb(packet, self)
 
     @log_exceptions
     def tx(self, *args):

@@ -5,5 +5,9 @@
     "port": "/dev/ttyUSB0",
     "baudrate": 57600
   },
+  "motors":{
+    "max_speed": 1600,
+    "max_steps": 106660
+  },
   "tornado_debug": 1
 }

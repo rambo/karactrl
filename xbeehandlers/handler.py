@@ -14,6 +14,7 @@ class handler(LoggerMixin):
     nodes_by_identifier = {}
     nodes_by_shortaddr = {}
     xb = None
+    new_node_callbacks = []
 
     def __init__(self, port, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,6 +57,14 @@ class handler(LoggerMixin):
             self.nodes_by_shortaddr[sa_hex] = node
 
             self.logger.info("New node {} at 0x{}".format(node.node_identifier, sa_hex))
+            # Trigger callbacks registered for new nodes
+            for cb in self.new_node_callbacks:
+                cb(node)
+
+        if packet['id'] == 'rx':
+            # Trigger node rx callbacks
+            sa_hex = binascii.hexlify(packet['short_addr'])
+            self.nodes_by_shortaddr[sa_hex].rx(packet)
 
     @log_exceptions
     def error_callback(self, *args):
@@ -76,7 +85,7 @@ class handler(LoggerMixin):
 
     @log_exceptions
     def ping_nodes(self):
-        """Ping each known node to make sure it's still alive, if not remove from node list (or maybe just mark dead somehow)"""
+        """Ping each known node to make sure it's still alive, if not mark it dead and remove from our list"""
         # TODO: Implement
         pass
 
