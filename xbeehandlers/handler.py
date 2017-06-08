@@ -28,8 +28,7 @@ class handler(LoggerMixin):
 
     @log_exceptions
     def xbee_callback(self, *args, **kwargs):
-        print("!!! WOOOF!!!!")
-        self.logger.debug("args: {} kwargs: {}", args, kwargs)
+        self.logger.debug("args: {} kwargs: {}".format(args, kwargs))
         packet = args[0]
 
         node_discovery_info = None
@@ -56,11 +55,11 @@ class handler(LoggerMixin):
             sa_hex = binascii.hexlify(node.short_addr)
             self.nodes_by_shortaddr[sa_hex] = node
 
-            self.logger.info("New node {} at 0x{}", node.node_identifier, sa_hex)
+            self.logger.info("New node {} at 0x{}".format(node.node_identifier, sa_hex))
 
     @log_exceptions
     def error_callback(self, *args):
-        self.logger.error("Got error args: {}", args)
+        self.logger.error("Got error args: {}".format(args))
         try:
             raise args[0]
         except Exception:
@@ -73,7 +72,6 @@ class handler(LoggerMixin):
 
     @log_exceptions
     def discover_nodes(self):
-        self.logger.debug("Calling ND")
         self.xb.at(command=b'ND')
 
     @log_exceptions
@@ -85,13 +83,13 @@ class handler(LoggerMixin):
     @log_exceptions
     def tx_all(self, *args):
         for nodeid in self.nodes_by_identifier.keys():
-            self.logger.debug("Sending to %s" % nodeid)
+            self.logger.debug("Sending to {}".format(nodeid))
             self.nodes_by_identifier[nodeid].tx(*args)
         self.logger.debug("All sent")
 
     @log_exceptions
     def tx_string_all(self, *args):
         for nodeid in self.nodes_by_identifier.keys():
-            self.logger.debug("Sending to %s" % nodeid)
+            self.logger.debug("Sending to {}".format(nodeid))
             self.nodes_by_identifier[nodeid].tx_string(*args)
         self.logger.debug("All sent")
