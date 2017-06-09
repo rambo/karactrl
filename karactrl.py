@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Server to talk to xbee radios to control the linear actuators and to web client"""
+import json
 import os
 
 import serial
 import tornado.web
-import json
 
 from core import main
 from core.decorators import log_exceptions
 from core.mixins import ConfigMixin, ControllerMixin, TimersMixin, ZMQMixin
-from xbeehandlers import xbee_handler
 from motorhelpers import KaraMoottori
 from sequencer import Sequence
+from xbeehandlers import xbee_handler
 
 template_root = os.path.join(os.path.dirname(__file__), 'templates')
 
@@ -49,7 +49,6 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
         except AttributeError:
             pass
 
-
     @log_exceptions
     def wait_for_motors(self):
         if len(self.motors) < 1:
@@ -64,7 +63,6 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
             logger_name=self.logger_name
         )
         self.seqtimer = self.add_timer(self._iterate_sequencer, self.config['sequence_timer'])
-
 
     @log_exceptions
     def _iterate_sequencer(self):

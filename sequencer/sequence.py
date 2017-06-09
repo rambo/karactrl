@@ -55,7 +55,7 @@ class Sequence(LoggerMixin, object):
         self.current_step_obj = SequenceStep(
             self.config['steps'][self.current_step_no],
             self.motors,
-            logger_name = self.logger_name
+            logger_name=self.logger_name
         )
         self.current_step_obj.start()
         return True

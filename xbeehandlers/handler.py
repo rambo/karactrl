@@ -1,5 +1,5 @@
-import time
 import binascii
+import time
 
 from xbee import ZigBee
 
