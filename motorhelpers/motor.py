@@ -5,6 +5,7 @@ from core.mixins import LoggerMixin
 
 
 class KaraMoottori(LoggerMixin):
+    name = None
     node = None
     ready = False
     homing = True
@@ -13,9 +14,10 @@ class KaraMoottori(LoggerMixin):
 
     def __init__(self, node, config, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.node = node
-        self.node.rx_callbacks.append(self.node_rx_callback)
         self.config = config
+        self.node = node
+        self.name = self.node.node_identifier
+        self.node.rx_callbacks.append(self.node_rx_callback)
 
     @log_exceptions
     def node_rx_callback(self, packet, node):
