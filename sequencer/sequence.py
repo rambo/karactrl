@@ -4,7 +4,7 @@ from core.mixins import LoggerMixin
 from .step import SequenceStep
 
 
-class Sequence(LoggerMixin):
+class Sequence(LoggerMixin, object):
     """
     sequenceconfig is dict
     {
@@ -15,6 +15,7 @@ class Sequence(LoggerMixin):
     """
     current_step_no = -1
     current_step_obj = None
+    done = False
 
     def __init__(self, sequenceconfig, motors, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,7 +26,7 @@ class Sequence(LoggerMixin):
                 self.motors[mkey].home()
 
     @log_exceptions
-    def _motors_done(self):
+    def motors_ready(self):
         ret = True
         for mkey in self.motors.keys():
             if not self.motors[mkey].ready:
@@ -35,12 +36,26 @@ class Sequence(LoggerMixin):
 
     @log_exceptions
     def iterate(self):
+        """Runs a step if previous one is ready"""
+        if self.done:
+            raise StopIteration()
         if self.current_step_no == -1:
             # Still homing ot otherwise not ready.
-            if not self._motors_done():
+            if not self.motors_ready():
                 return False
         if self.current_step_obj and not self.current_step_obj.done():
             return False
-        self.current_step_no = (self.current_step_no + 1) % len(self.config['steps'])
-        self.current_step_obj = SequenceStep(self.config['steps'][self.current_step_no])
+        self.current_step_no += 1
+        if self.config['loop']:
+            self.current_step_no = self.current_step_no % len(self.config['steps'])
+        else:
+            if self.current_step_no >= len(self.config['steps']):
+                self.done = True
+                return False
+        self.current_step_obj = SequenceStep(
+            self.config['steps'][self.current_step_no],
+            self.motors,
+            logger_name = self.logger_name
+        )
         self.current_step_obj.start()
+        return True

@@ -1,4 +1,5 @@
 import struct
+import binascii
 
 from core.decorators import log_exceptions
 from core.mixins import LoggerMixin
@@ -23,13 +24,13 @@ class KaraMoottori(LoggerMixin):
     def node_rx_callback(self, packet, node):
         """Handle messages from node, set ready-state accordingly"""
         data = packet['rf_data']
-        if data[0] != b'M':
+        if data[0] != ord('M'):
             self.logger.warning("Got packet that did not start with 'M' don't know how to handle those")
             return
 
         # AVRs may be little-endian but we packe these values manually to network byte order
-        current_steps = struct.unpack('>i', data[2:6])
-        target_steps = struct.unpack('>i', data[6:10])
+        current_steps = struct.unpack('>i', data[2:6])[0]
+        target_steps = struct.unpack('>i', data[6:10])[0]
         self.target_pos = (target_steps / self.config['max_steps']) * 100
         self.current_pos = (current_steps / self.config['max_steps']) * 100
 
@@ -65,6 +66,11 @@ class KaraMoottori(LoggerMixin):
         """Send stop-command to node"""
         self.node.tx_string(b"S")
 
+    def hex_encode(self, input):
+        be = struct.pack('>i', input)
+        return binascii.hexlify(be)
+
+
     @log_exceptions
     def go_to(self, len_percent, speed_percent=None):
         """Move to position (given as percentage of full travel), if travel speed is not defined previous value held
@@ -72,7 +78,13 @@ class KaraMoottori(LoggerMixin):
         self.ready = False
         if speed_percent:
             pps = int((self.config['max_speed'] / 100) * speed_percent)
-            self.node.tx_string(b"F{:08X}".format(pps))
-            raise NotImplemented()
+            # sanity check
+            if pps < 1:
+                pps = 15
+            msg = b"F"+self.hex_encode(pps)
+            self.logger.debug("Sending {}, pps={}".format(msg, pps))
+            self.node.tx_string(msg)
         target_pos = int((self.config['max_steps'] / 100) * len_percent)
-        self.node.tx_string(b"G{:08X}".format(target_pos))
+        msg = b"G" + self.hex_encode(target_pos)
+        self.logger.debug("Sending {}, target_pos={}".format(msg, target_pos))
+        self.node.tx_string(msg)

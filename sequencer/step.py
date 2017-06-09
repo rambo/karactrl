@@ -30,6 +30,7 @@ class SequenceStep(LoggerMixin):
         for mkey in self.config['motors'].keys():
             if mkey not in self.motors:
                 self.logger.warning("Configured motor '{}' is not available".format(mkey))
+                continue
             motor = self.motors[mkey]
             pos, speed = self.config['motors'][mkey]
             if not motor.ready:

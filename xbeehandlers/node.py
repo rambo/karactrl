@@ -14,12 +14,11 @@ class XbeeNode(LoggerMixin):
     alive = True
 
     def __init__(self, xbee, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.xb = xbee
-        self.short_addr = kwargs['short_addr']
-        # TODO: autodiscover this if not given
-        self.long_addr = kwargs['long_addr']
-        self.node_identifier = kwargs['node_identifier']
+        self.short_addr = kwargs.pop('short_addr')
+        self.long_addr = kwargs.pop('long_addr')
+        self.node_identifier = kwargs.pop('node_identifier')
+        super().__init__(*args, **kwargs)
 
     @log_exceptions
     def rx(self, packet, *args):
@@ -39,5 +38,5 @@ class XbeeNode(LoggerMixin):
         """Send a string (ASCII) to node, this will handle unpacking of the string to list of bytes and passing it correctly"""
         if not isinstance(send_bytes, bytes):  # ZMQ uses always bytes
             send_bytes = send_bytes.encode('utf-8')
-        send_args = [ord(x) for x in send_bytes]
+        send_args = list(send_bytes)
         self.tx(*send_args)
