@@ -66,7 +66,12 @@ class KaraMoottori(LoggerMixin):
         """Send stop-command to node"""
         self.node.tx_string(b"S")
 
-    def hex_encode(self, input):
+
+    def hex_encode_uint16_t(self, input):
+        be = struct.pack('>H', input)
+        return binascii.hexlify(be)
+
+    def hex_encode_int32_t(self, input):
         be = struct.pack('>i', input)
         return binascii.hexlify(be)
 
@@ -81,10 +86,10 @@ class KaraMoottori(LoggerMixin):
             # sanity check
             if pps < 1:
                 pps = 15
-            msg = b"F"+self.hex_encode(pps)
+            msg = b"F"+self.hex_encode_uint16_t(pps)
             self.logger.debug("Sending {}, pps={}".format(msg, pps))
             self.node.tx_string(msg)
         target_pos = int((self.config['max_steps'] / 100) * len_percent)
-        msg = b"G" + self.hex_encode(target_pos)
+        msg = b"G" + self.hex_encode_int32_t(target_pos)
         self.logger.debug("Sending {}, target_pos={}".format(msg, target_pos))
         self.node.tx_string(msg)
