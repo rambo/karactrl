@@ -24,6 +24,7 @@ class XbeeNode(LoggerMixin):
     @log_exceptions
     def rx(self, packet, *args):
         """Received packet, fire the callbacks"""
+        self.alive = True
         for cb in self.rx_callbacks:
             cb(packet, self)
 
