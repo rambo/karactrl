@@ -1,3 +1,6 @@
+node_modules
+jsdist/bundle.js
+
 # Everyone has their own settings
 .idea
 # virtualenv

@@ -14,7 +14,7 @@ from sequencer import Sequence
 from xbeehandlers import xbee_handler
 
 template_root = os.path.join(os.path.dirname(__file__), 'templates')
-
+js_root = os.path.join(os.path.dirname(__file__), 'jsdist')
 
 class MainHandler(ControllerMixin, tornado.web.RequestHandler):
     """Returns our index.html, rendered via template engine"""
@@ -76,16 +76,20 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
         if self.xbeehandler:
             self.xbeehandler.quit()
             self.motors = {}
-        self.serialport = serial.Serial(**self.config['serial'])
-        self.xbeehandler = xbee_handler(
-            self.serialport,
-            logger_name=self.logger_name
-        )
-        self.xbeehandler.new_node_callbacks.append(self.new_xbee_node)
+        if 'disable' in self.config['serial'] and self.config['serial']['disable']:
+            self.logger.warning("*** Serial port disabled ***")
+        else:
+            self.serialport = serial.Serial(**self.config['serial'])
+            self.xbeehandler = xbee_handler(
+                self.serialport,
+                logger_name=self.logger_name
+            )
+            self.xbeehandler.new_node_callbacks.append(self.new_xbee_node)
         self.seqtimer = self.add_timer(self.wait_for_motors, 500)
 
         self.ws_app = tornado.web.Application([
             (r'/', MainHandler, {'controller': self}),
+            (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': js_root}),
         ], template_path=template_root, debug=self.config['tornado_debug'])
         self.logger.info("Binding to port %d" % self.config['http_server_port'])
         self.ws_app.listen(self.config['http_server_port'])
