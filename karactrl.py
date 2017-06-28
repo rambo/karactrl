@@ -72,7 +72,7 @@ class MotorWebsocketHandler(tornado.websocket.WebSocketHandler):
                 with open(self.controller.config['sequence_file'], 'wt') as fp:
                     sequence_config = msg['sequence']
                     json.dump(sequence_config, fp, separators=(',', ' : '), indent=2)
-                    self.controller.sequence_reload()
+                self.controller.sequence_reload()
 
 
 class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):

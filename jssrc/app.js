@@ -154,11 +154,18 @@ class Main extends React.Component {
         this.setState({ sequence: seq_mod})
     }
 
+    remove_last_row(){
+        var seq_mod = this.state.sequence;
+        seq_mod.steps.splice(-1)
+        this.setState({ sequence: seq_mod})
+    }
+
+
     render_row(row, index){
         console.log(row);
         return(
             <Row key={index.toString()}>
-                <Col md={12}>
+                <Col md={11}>
                     <SequenceStep
                         dwell={row.dwell}
                         m1speed={row.motors.Motor1[1]} m1position={row.motors.Motor1[0]}
@@ -179,8 +186,9 @@ class Main extends React.Component {
             <Grid fluid>
                 {this.render_rows()}
                 <Row>
-                    <Col md={2}><button onClick={(_) => { this.add_row()}}>Add row</button></Col>
-                    <Col md={2}><button onClick={(_) => { this.save_sequence()}}>Save and restart</button></Col>
+                    <Col md={2}><button onClick={(_) => {this.add_row()}}>Add row</button></Col>
+                    <Col md={2}><button onClick={(_) => {this.remove_last_row()}}>Remove row</button></Col>
+                    <Col md={2}><button onClick={(_) => {this.save_sequence()}}>Save and restart</button></Col>
                 </Row>
             </Grid>
         )
