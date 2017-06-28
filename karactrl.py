@@ -68,6 +68,12 @@ class MotorWebsocketHandler(tornado.websocket.WebSocketHandler):
                 self.logger.info("Sending back sequence")
                 self.write_message(json.dumps(reply))
 
+            if msg['cmd'] == 'save_sequence':
+                with open(self.controller.config['sequence_file'], 'wt') as fp:
+                    sequence_config = msg['sequence']
+                    json.dump(sequence_config, fp, separators=(',', ' : '), indent=2)
+                    self.controller.sequence_reload()
+
 
 class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
     xbeehandler = None
@@ -98,6 +104,10 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
         if len(self.motors) < 1:
             #self.logger.debug("No motors yet, not starting sequencer")
             return
+        self.sequence_reload()
+
+    @log_exceptions
+    def sequence_reload(self):
         self.seqtimer.stop()
         with open(self.config['sequence_file'], 'rt') as fp:
             sequence_config = json.load(fp)

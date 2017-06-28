@@ -105,6 +105,8 @@ class Main extends React.Component {
         super(props, context)
         this.state = {
             sequence: {
+                loop: 1,
+                start_with_home: 1,
                 steps: []
             }
         }
@@ -130,6 +132,13 @@ class Main extends React.Component {
                     break;
             }
         }
+    }
+
+    save_sequence(){
+        this.seqws.send(JSON.stringify({
+            cmd: "save_sequence" ,
+            sequence: this.state.sequence
+        }))
     }
 
     add_row(){
@@ -169,7 +178,10 @@ class Main extends React.Component {
         return (
             <Grid fluid>
                 {this.render_rows()}
-                <Row><Col md={2}><button onClick={(_) => { this.add_row()}}>Add row</button></Col></Row>
+                <Row>
+                    <Col md={2}><button onClick={(_) => { this.add_row()}}>Add row</button></Col>
+                    <Col md={2}><button onClick={(_) => { this.save_sequence()}}>Save and restart</button></Col>
+                </Row>
             </Grid>
         )
     }
