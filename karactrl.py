@@ -5,6 +5,7 @@ import os
 
 import serial
 import tornado.web
+import tornado.websocket
 
 from core import main
 from core.decorators import log_exceptions
@@ -16,6 +17,7 @@ from xbeehandlers import xbee_handler
 template_root = os.path.join(os.path.dirname(__file__), 'templates')
 js_root = os.path.join(os.path.dirname(__file__), 'jsdist')
 
+
 class MainHandler(ControllerMixin, tornado.web.RequestHandler):
     """Returns our index.html, rendered via template engine"""
 
@@ -23,6 +25,44 @@ class MainHandler(ControllerMixin, tornado.web.RequestHandler):
         self.render(
             "index.html",
         )
+
+
+class MotorWebsocketHandler(tornado.websocket.WebSocketHandler):
+
+    def __init__(self, application, request, *args, **kwargs):
+        """Initialize with references to controller and logger"""
+        self.controller = kwargs.pop('controller')
+        self.logger = self.controller.logger
+        super(MotorWebsocketHandler, self).__init__(application, request, **kwargs)
+
+    def open(self, *args, **kwargs):
+        """new WS connection"""
+        self.logger.info("New WS stream handled by %s, args=%s kwargs=%s" % (self.__class__.__name__, repr(args), repr(kwargs)))
+
+    def on_close(self, *args, **kwargs):
+        """Connection closed"""
+        self.logger.debug("WS stream closed, args=%s kwargs=%s" % (repr(args), repr(kwargs)))
+
+    def check_origin(self, origin):
+        """NOP implementation for checking WebSocket origin"""
+        self.logger.debug("check_origin called for {}".format(origin))
+        return True
+
+    def on_message(self, message, *args, **kwargs):
+        """Got message"""
+        self.logger.debug("got message {}".format(message))
+        msg = json.loads(message)
+        self.write_message(json.dumps({ 'type': 'pong'}))
+        if 'cmd' in msg:
+            if msg['cmd'] == 'get_sequence':
+                with open(self.controller.config['sequence_file'], 'rt') as fp:
+                    sequence_config = json.load(fp)
+                reply = {
+                    'type': 'sequence',
+                    'sequence': sequence_config,
+                }
+                self.logger.info("Sending back sequence")
+                self.write_message(json.dumps(reply))
 
 
 class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
@@ -52,7 +92,7 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
     @log_exceptions
     def wait_for_motors(self):
         if len(self.motors) < 1:
-            self.logger.debug("No motors yet, not starting sequencer")
+            #self.logger.debug("No motors yet, not starting sequencer")
             return
         self.seqtimer.stop()
         with open(self.config['sequence_file'], 'rt') as fp:
@@ -89,6 +129,7 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
 
         self.ws_app = tornado.web.Application([
             (r'/', MainHandler, {'controller': self}),
+            (r'/ws/?', MotorWebsocketHandler, {'controller': self}),
             (r'/js/(.*)', tornado.web.StaticFileHandler, {'path': js_root}),
         ], template_path=template_root, debug=self.config['tornado_debug'])
         self.logger.info("Binding to port %d" % self.config['http_server_port'])
