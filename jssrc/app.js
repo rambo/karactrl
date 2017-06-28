@@ -132,6 +132,19 @@ class Main extends React.Component {
         }
     }
 
+    add_row(){
+        var seq_mod = this.state.sequence;
+        seq_mod.steps.push({
+            dwell: 0,
+            motors: {
+                Motor1: [0,0],
+                Motor2: [0,0],
+                Motor3: [0,0]
+            }
+        });
+        this.setState({ sequence: seq_mod})
+    }
+
     render_row(row, index){
         console.log(row);
         return(
@@ -156,6 +169,7 @@ class Main extends React.Component {
         return (
             <Grid fluid>
                 {this.render_rows()}
+                <Row><Col md={2}><button onClick={(_) => { this.add_row()}}>Add row</button></Col></Row>
             </Grid>
         )
     }
