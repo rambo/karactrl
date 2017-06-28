@@ -35,19 +35,23 @@ class MotorWebsocketHandler(tornado.websocket.WebSocketHandler):
         self.logger = self.controller.logger
         super(MotorWebsocketHandler, self).__init__(application, request, **kwargs)
 
+    @log_exceptions
     def open(self, *args, **kwargs):
         """new WS connection"""
         self.logger.info("New WS stream handled by %s, args=%s kwargs=%s" % (self.__class__.__name__, repr(args), repr(kwargs)))
 
+    @log_exceptions
     def on_close(self, *args, **kwargs):
         """Connection closed"""
         self.logger.debug("WS stream closed, args=%s kwargs=%s" % (repr(args), repr(kwargs)))
 
+    @log_exceptions
     def check_origin(self, origin):
         """NOP implementation for checking WebSocket origin"""
         self.logger.debug("check_origin called for {}".format(origin))
         return True
 
+    @log_exceptions
     def on_message(self, message, *args, **kwargs):
         """Got message"""
         self.logger.debug("got message {}".format(message))

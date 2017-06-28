@@ -101,7 +101,17 @@ class SequenceStep extends React.Component {
 }
 
 class Main extends React.Component {
+    constructor (props, context) {
+        super(props, context)
+        this.state = {
+            sequence: {
+                steps: []
+            }
+        }
+    }
+
     componentDidMount(){
+        var me = this;
         var url = function(s) {
             var l = window.location;
             return ((l.protocol === "https:") ? "wss://" : "ws://") + l.host + s;
@@ -116,19 +126,36 @@ class Main extends React.Component {
             var msg = JSON.parse(event.data);
             switch(msg.type) {
                 case "sequence":
-                    msg.sequence.steps.forEach(function(row) {
-                        console.log(row)
-                    });
+                    me.setState({ sequence: msg.sequence})
                     break;
             }
         }
-
     }
+
+    render_row(row, index){
+        console.log(row);
+        return(
+            <Row key={index.toString()}>
+                <Col md={12}>
+                    <SequenceStep
+                        dwell={row.dwell}
+                        m1speed={row.motors.Motor1[1]} m1position={row.motors.Motor1[0]}
+                        m2speed={row.motors.Motor2[1]} m2position={row.motors.Motor2[0]}
+                        m3speed={row.motors.Motor3[1]} m3position={row.motors.Motor3[0]}
+                    />
+                </Col>
+            </Row>
+        )
+    }
+
+    render_rows(){
+        return this.state.sequence.steps.map(this.render_row)
+    }
+
     render() {
         return (
             <Grid fluid>
-                <Row><Col md={12}><SequenceStep m1speed={80} dwell={15}/></Col></Row>
-                <Row><Col md={12}><SequenceStep /></Col></Row>
+                {this.render_rows()}
             </Grid>
         )
     }
