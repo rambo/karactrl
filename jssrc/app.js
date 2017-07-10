@@ -149,28 +149,28 @@ class Main extends React.Component {
                 start_with_home: 1,
                 steps: []
             }
-        }
+        };
         this.handleMotorChange = this.handleMotorChange.bind(this);
         this.handleDwellChange = this.handleDwellChange.bind(this);
         this.render_row = this.render_row.bind(this);
     }
 
     handleMotorChange(stepno, motorid, newval, validx) {
-        var seq_mod = this.state.sequence;
+        let seq_mod = this.state.sequence;
         seq_mod.steps[stepno].motors[motorid][validx] = newval;
         this.setState({ sequence: seq_mod})
     }
 
     handleDwellChange(stepno, newval) {
-        var seq_mod = this.state.sequence;
+        let seq_mod = this.state.sequence;
         seq_mod.steps[stepno].dwell = newval;
         this.setState({ sequence: seq_mod})
     }
 
     componentDidMount(){
-        var me = this;
-        var url = function(s) {
-            var l = window.location;
+        let me = this;
+        let url = function(s) {
+            let l = window.location;
             return ((l.protocol === "https:") ? "wss://" : "ws://") + l.host + s;
         };
         this.seqws = new WebSocket(url('/ws'));
@@ -180,7 +180,7 @@ class Main extends React.Component {
         };
         this.seqws.onmessage = function(event) {
             console.log(event.data)
-            var msg = JSON.parse(event.data);
+            let msg = JSON.parse(event.data);
             switch(msg.type) {
                 case "sequence":
                     me.setState({ sequence: msg.sequence})
@@ -201,7 +201,7 @@ class Main extends React.Component {
     }
 
     add_row(){
-        var seq_mod = this.state.sequence;
+        let seq_mod = this.state.sequence;
         seq_mod.steps.push({
             dwell: 0,
             motors: {
@@ -214,7 +214,7 @@ class Main extends React.Component {
     }
 
     remove_last_row(){
-        var seq_mod = this.state.sequence;
+        let seq_mod = this.state.sequence;
         seq_mod.steps.splice(-1)
         this.setState({ sequence: seq_mod})
     }
