@@ -8,57 +8,79 @@ import 'react-rangeslider/lib/index.css'
 
 
 class FloatPercentSlider extends React.Component {
-  constructor (props, context) {
-    super(props, context)
-    this.state = {
-      value: props.value ? props.value : 0
+    constructor (props, context) {
+        super(props, context);
+        this.handleChange = this.handleChange.bind(this);
     }
-  }
 
-  render () {
-    const { value } = this.state
-    return (
-      <div className='slider'>
-        <Slider
-          min={0}
-          max={100}
-          step={0.25}
-          value={value}
-          onChange={(newval) => this.setState({value: newval})}
-        />
-        <div className='value'>{value}%</div>
-      </div>
-    )
-  }
+    handleChange(newval) {
+        this.props.propagateChange(newval);
+    }
+
+    render () {
+        const value = this.props.value;
+        return (
+          <div className='slider'>
+            <Slider
+              min={0}
+              max={100}
+              step={0.25}
+              value={value}
+              onChange={this.handleChange}
+            />
+            <div className='value'>{value}%</div>
+          </div>
+        )
+    }
 }
 
 class DwellSlider extends React.Component {
-  constructor (props, context) {
-    super(props, context)
-    this.state = {
-      value: props.value ? props.value : 0
+    constructor (props, context) {
+        super(props, context);
+        this.handleChange = this.handleChange.bind(this);
     }
-  }
 
-  render () {
-    const { value } = this.state
-    return (
-      <div className='slider'>
-        <Slider
-          min={0}
-          max={900}
-          step={0.25}
-          value={value}
-          onChange={(newval) => this.setState({value: newval})}
-        />
-        <div className='value'>{value} seconds</div>
-      </div>
-    )
-  }
+    handleChange(newval) {
+        this.props.propagateChange(newval);
+    }
+
+    render () {
+        const value = this.props.value;
+        return (
+          <div className='slider'>
+            <Slider
+              min={0}
+              max={900}
+              step={0.25}
+              value={value}
+              onChange={this.handleChange}
+            />
+            <div className='value'>{value}s</div>
+          </div>
+        )
+    }
 }
 
 
 class Motor extends React.Component {
+    constructor (props, context) {
+        super(props, context);
+        this.handleSpeedChange = this.handleSpeedChange.bind(this);
+        this.handlePositionChange = this.handlePositionChange.bind(this);
+    }
+
+    handlePositionChange(newval) {
+        if (this.props.propagateChange) {
+            this.props.propagateChange(this.props.id, newval, 0);
+        }
+    }
+
+    handleSpeedChange(newval) {
+        if (this.props.propagateChange) {
+            this.props.propagateChange(this.props.id, newval, 1);
+        }
+    }
+
     render () {
         return(
             <Row className='motor' >
@@ -67,11 +89,11 @@ class Motor extends React.Component {
                 </Col>
                 <Col className='position' md={4}>
                     <h3>Position</h3>
-                    <FloatPercentSlider value={this.props.position} />
+                    <FloatPercentSlider value={this.props.position} propagateChange={this.handlePositionChange} />
                 </Col>
                 <Col className='speed' md={4}>
                     <h3>Speed</h3>
-                    <FloatPercentSlider value={this.props.speed} />
+                    <FloatPercentSlider value={this.props.speed} propagateChange={this.handleSpeedChange} />
                 </Col>
             </Row>
         )
@@ -79,19 +101,37 @@ class Motor extends React.Component {
 }
 
 class SequenceStep extends React.Component {
+    constructor (props, context) {
+        super(props, context);
+        this.handleMotorChange = this.handleMotorChange.bind(this);
+        this.handleDwellChange = this.handleDwellChange.bind(this);
+    }
+
+    handleMotorChange(motorid, newval, validx) {
+        if (this.props.propagateMotorChange) {
+            this.props.propagateMotorChange(this.props.stepno, motorid, newval, validx);
+        }
+    }
+
+    handleDwellChange(newval) {
+        if (this.props.propagateDwellChange) {
+            this.props.propagateDwellChange(this.props.stepno, newval);
+        }
+    }
+
     render() {
         return (
             <Row className='sequencestep'>
                 <Col md={12}>
                     <Row>
-                        <Col md={4}><Motor id="Motor1" speed={this.props.m1speed} position={this.props.m1position} /></Col>
-                        <Col md={4}><Motor id="Motor2" speed={this.props.m2speed} position={this.props.m2position} /></Col>
-                        <Col md={4}><Motor id="Motor3" speed={this.props.m3speed} position={this.props.m3position} /></Col>
+                        <Col md={4}><Motor id="Motor1" speed={this.props.m1speed} position={this.props.m1position} propagateChange={this.handleMotorChange} /></Col>
+                        <Col md={4}><Motor id="Motor2" speed={this.props.m2speed} position={this.props.m2position} propagateChange={this.handleMotorChange} /></Col>
+                        <Col md={4}><Motor id="Motor3" speed={this.props.m3speed} position={this.props.m3position} propagateChange={this.handleMotorChange} /></Col>
                     </Row>
                     <Row>
                         <Col md={6}>
                             <h3>Dwell</h3>
-                            <DwellSlider value={this.props.dwell}/>
+                            <DwellSlider value={this.props.dwell} propagateChange={this.handleDwellChange} />
                         </Col>
                     </Row>
                 </Col>
@@ -102,7 +142,7 @@ class SequenceStep extends React.Component {
 
 class Main extends React.Component {
     constructor (props, context) {
-        super(props, context)
+        super(props, context);
         this.state = {
             sequence: {
                 loop: 1,
@@ -110,6 +150,21 @@ class Main extends React.Component {
                 steps: []
             }
         }
+        this.handleMotorChange = this.handleMotorChange.bind(this);
+        this.handleDwellChange = this.handleDwellChange.bind(this);
+        this.render_row = this.render_row.bind(this);
+    }
+
+    handleMotorChange(stepno, motorid, newval, validx) {
+        var seq_mod = this.state.sequence;
+        seq_mod.steps[stepno].motors[motorid][validx] = newval;
+        this.setState({ sequence: seq_mod})
+    }
+
+    handleDwellChange(stepno, newval) {
+        var seq_mod = this.state.sequence;
+        seq_mod.steps[stepno].dwell = newval;
+        this.setState({ sequence: seq_mod})
     }
 
     componentDidMount(){
@@ -132,6 +187,10 @@ class Main extends React.Component {
                     break;
             }
         }
+    }
+
+    componentWillUnmount(){
+        this.seqws.close()
     }
 
     save_sequence(){
@@ -162,15 +221,17 @@ class Main extends React.Component {
 
 
     render_row(row, index){
-        console.log(row);
         return(
             <Row key={index.toString()}>
                 <Col md={11}>
                     <SequenceStep
+                        stepno={index}
                         dwell={row.dwell}
                         m1speed={row.motors.Motor1[1]} m1position={row.motors.Motor1[0]}
                         m2speed={row.motors.Motor2[1]} m2position={row.motors.Motor2[0]}
                         m3speed={row.motors.Motor3[1]} m3position={row.motors.Motor3[0]}
+                        propagateDwellChange={this.handleDwellChange}
+                        propagateMotorChange={this.handleMotorChange}
                     />
                 </Col>
             </Row>
