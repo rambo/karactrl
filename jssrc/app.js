@@ -179,11 +179,11 @@ class Main extends React.Component {
             event.currentTarget.send(JSON.stringify({ cmd: "get_sequence" }))
         };
         this.seqws.onmessage = function(event) {
-            console.log(event.data)
+            console.log(event.data);
             let msg = JSON.parse(event.data);
             switch(msg.type) {
                 case "sequence":
-                    me.setState({ sequence: msg.sequence})
+                    me.setState({ sequence: msg.sequence});
                     break;
             }
         }
@@ -215,7 +215,7 @@ class Main extends React.Component {
 
     remove_last_row(){
         let seq_mod = this.state.sequence;
-        seq_mod.steps.splice(-1)
+        seq_mod.steps.splice(-1);
         this.setState({ sequence: seq_mod})
     }
 
@@ -247,9 +247,9 @@ class Main extends React.Component {
             <Grid fluid>
                 {this.render_rows()}
                 <Row>
-                    <Col md={2}><button onClick={(_) => {this.add_row()}}>Add row</button></Col>
-                    <Col md={2}><button onClick={(_) => {this.remove_last_row()}}>Remove row</button></Col>
-                    <Col md={2}><button onClick={(_) => {this.save_sequence()}}>Save and restart</button></Col>
+                    <Col md={2}><button onClick={() => {this.add_row()}}>Add row</button></Col>
+                    <Col md={2}><button onClick={() => {this.remove_last_row()}}>Remove row</button></Col>
+                    <Col md={2}><button onClick={() => {this.save_sequence()}}>Save and restart</button></Col>
                 </Row>
             </Grid>
         )
@@ -258,5 +258,5 @@ class Main extends React.Component {
 
 
 
-const app = document.getElementById('app')
-ReactDOM.render(<Main />, app)
+const app = document.getElementById('app');
+ReactDOM.render(<Main />, app);
