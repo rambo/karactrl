@@ -109,6 +109,7 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
     @log_exceptions
     def sequence_reload(self):
         self.seqtimer.stop()
+        self.sequencer = None
         with open(self.config['sequence_file'], 'rt') as fp:
             sequence_config = json.load(fp)
         self.sequencer = Sequence(
@@ -133,6 +134,8 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
         if 'disable' in self.config['serial'] and self.config['serial']['disable']:
             self.logger.warning("*** Serial port disabled ***")
         else:
+            if 'disable' in self.config['serial']:
+                del(self.config['serial']['disable'])
             self.serialport = serial.Serial(**self.config['serial'])
             self.xbeehandler = xbee_handler(
                 self.serialport,
