@@ -68,11 +68,11 @@ class KaraMoottori(LoggerMixin):
 
     def hex_encode_uint16_t(self, input):
         be = struct.pack('>H', input)
-        return binascii.hexlify(be)
+        return binascii.hexlify(be).upper()
 
     def hex_encode_int32_t(self, input):
         be = struct.pack('>i', input)
-        return binascii.hexlify(be)
+        return binascii.hexlify(be).upper()
 
     @log_exceptions
     def go_to(self, len_percent, speed_percent=None):
@@ -89,5 +89,5 @@ class KaraMoottori(LoggerMixin):
             self.node.tx_string(msg)
         target_pos = int((self.config['max_steps'] / 100) * len_percent)
         msg = b"G" + self.hex_encode_int32_t(target_pos)
-        self.logger.debug("Sending {}, target_pos={}".format(msg, target_pos))
+        self.logger.debug("Sending {}, target_pos={} ({}%)".format(msg, target_pos, len_percent))
         self.node.tx_string(msg)
