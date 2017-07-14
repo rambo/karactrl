@@ -1,4 +1,3 @@
 # KaraCTRL
 
-Controls the linear actuators
-
+Sequencer UI and Sequencer itself for controlling <https://github.com/rambo/timerone_stepper> motors.
