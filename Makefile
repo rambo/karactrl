@@ -11,7 +11,6 @@ all: package
 
 dist/karactrl: karactrl.py karactrl.spec requirements.txt jssrc/app.js
 	virtualenv --system-site-packages -p `which python3` $(VENVDIR)
-	npm run build
 	source $(VENVDIR)/bin/activate ; pip install -r requirements_dev.txt
 	source $(VENVDIR)/bin/activate ; pyinstaller --clean --onefile karactrl.spec
 	rm -rf $(VENVDIR)
