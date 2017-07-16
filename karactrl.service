@@ -1,0 +1,11 @@
+[Unit]
+Description=Control linear motors via XBee
+#Author=Eero af Heurlin <eero.afheurlin@affecto.com>
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hacklab/karactrl
+ExecStart=/opt/hacklab/karactrl/karactrl
+
+[Install]
+WantedBy=multi-user.target
