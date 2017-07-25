@@ -28,7 +28,7 @@ class FloatPercentSlider extends React.Component {
               value={value}
               onChange={this.handleChange}
             />
-            <div className='value'>{value}%</div>
+            <input type="text" size="4" value={value} onChange={(event) => this.handleChange(event.target.value)} />%
           </div>
         )
     }
@@ -55,7 +55,7 @@ class DwellSlider extends React.Component {
               value={value}
               onChange={this.handleChange}
             />
-            <div className='value'>{value}s</div>
+            <input type="text" size="4" value={value} onChange={(event) => this.handleChange(event.target.value)} />s
           </div>
         )
     }
