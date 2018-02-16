@@ -112,6 +112,8 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
         self.sequencer = None
         with open(self.config['sequence_file'], 'rt') as fp:
             sequence_config = json.load(fp)
+        for mkey in self.motors.keys():
+            self.motors[mkey].stop()
         self.sequencer = Sequence(
             sequence_config,
             self.motors,
