@@ -79,6 +79,8 @@ class KaraMoottori(LoggerMixin):
         """Move to position (given as percentage of full travel), if travel speed is not defined previous value held
         in the controller memory will be used"""
         self.ready = False
+        len_percent = float(len_percent)
+        speed_percent = float(speed_percent)
         if speed_percent:
             pps = int((self.config['max_speed'] / 100) * speed_percent)
             # sanity check

@@ -56,6 +56,6 @@ class SequenceStep(LoggerMixin):
             self.logger.debug("Motors done, starting {}s dwell".format(self.config['dwell']))
             self.dwell_started = time.time()
             return False
-        if (time.time() - self.dwell_started) < self.config['dwell']:
+        if (time.time() - self.dwell_started) < float(self.config['dwell']):
             return False
         return True
