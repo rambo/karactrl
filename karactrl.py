@@ -56,7 +56,7 @@ class MotorWebsocketHandler(tornado.websocket.WebSocketHandler):
         """Got message"""
         self.logger.debug("got message {}".format(message))
         msg = json.loads(message)
-        self.write_message(json.dumps({ 'type': 'pong'}))
+        self.write_message(json.dumps({'type': 'pong'}))
         if 'cmd' in msg:
             if msg['cmd'] == 'get_sequence':
                 with open(self.controller.config['sequence_file'], 'rt') as fp:
