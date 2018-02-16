@@ -25,7 +25,7 @@ class KaraMoottori(LoggerMixin):
         """Handle messages from node, set ready-state accordingly"""
         data = packet['rf_data']
         if data[0] != ord('M'):
-            self.logger.warning("Got packet that did not start with 'M' don't know how to handle those")
+            self.logger.warning("{}: Got packet that did not start with 'M' don't know how to handle those".format(self.name))
             return
 
         # AVRs may be little-endian but we packe these values manually to network byte order
@@ -48,7 +48,8 @@ class KaraMoottori(LoggerMixin):
             # Stop callback
             self.ready = True
 
-        self.logger.debug("Current position {}% ({}), target position {}% ({})".format(
+        self.logger.debug("{}: Current position {}% ({}), target position {}% ({})".format(
+            self.name,
             self.current_pos,
             current_steps,
             self.target_pos,
@@ -87,9 +88,9 @@ class KaraMoottori(LoggerMixin):
             if pps < 1:
                 pps = 15
             msg = b"F" + self.hex_encode_uint16_t(pps)
-            self.logger.debug("Sending {}, pps={}".format(msg, pps))
+            self.logger.debug("{}: Sending {}, pps={}".format(self.name, msg, pps))
             self.node.tx_string(msg)
         target_pos = int((self.config['max_steps'] / 100) * len_percent)
         msg = b"G" + self.hex_encode_int32_t(target_pos)
-        self.logger.debug("Sending {}, target_pos={} ({}%)".format(msg, target_pos, len_percent))
+        self.logger.debug("{}: Sending {}, target_pos={} ({}%)".format(self.name, msg, target_pos, len_percent))
         self.node.tx_string(msg)
