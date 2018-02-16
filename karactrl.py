@@ -167,6 +167,8 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
     def cleanup(self, *args, **kwargs):
         """Cleanup SHOULD be called before quitting mainloop.
         remember to use super() to call all mixin/parent cleanup methods too"""
+        for mkey in self.motors.keys():
+            self.motors[mkey].stop()
         if self.xbeehandler:
             self.xbeehandler.quit()
         super().cleanup(*args, **kwargs)
