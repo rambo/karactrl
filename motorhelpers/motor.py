@@ -60,6 +60,7 @@ class KaraMoottori(LoggerMixin):
     def home(self):
         """Send stop-command to node"""
         self.ready = False
+        self.homing = True
         self.node.tx_string(b"H")
 
     @log_exceptions
