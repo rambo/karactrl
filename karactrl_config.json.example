@@ -7,7 +7,8 @@
   },
   "motors":{
     "max_speed": 1600,
-    "max_steps": 106660
+    "max_steps": 106660,
+    "wait_for": [ "Motor1", "Motor2", "Motor3"]
   },
   "sequence_file": "sequence.json.example",
   "sequence_timer": 100,

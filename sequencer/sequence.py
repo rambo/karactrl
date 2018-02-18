@@ -16,16 +16,13 @@ class Sequence(LoggerMixin, object):
     current_step_no = -1
     current_step_obj = None
     done = False
+    homing_called = False
 
     def __init__(self, sequenceconfig, motors, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger.debug("initializing sequencer")
         self.config = sequenceconfig
         self.motors = motors
-        if self.config['start_with_home']:
-            for mkey in self.motors.keys():
-                self.logger.debug("Homing {}".format(mkey))
-                self.motors[mkey].home()
 
     @log_exceptions
     def motors_ready(self):
@@ -44,6 +41,11 @@ class Sequence(LoggerMixin, object):
         if self.done:
             raise StopIteration()
         if self.current_step_no == -1:
+            if self.config['start_with_home'] and not self.homing_called:
+                for mkey in self.motors.keys():
+                    self.logger.debug("Homing {}".format(mkey))
+                    self.motors[mkey].home()
+                self.homing_called = True
             # Still homing ot otherwise not ready.
             if not self.motors_ready():
                 self.logger.debug("Waiting for motors before starting sequence")

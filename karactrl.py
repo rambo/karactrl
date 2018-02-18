@@ -101,8 +101,14 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
 
     @log_exceptions
     def wait_for_motors(self):
-        if len(self.motors) < 1:
-            #self.logger.debug("No motors yet, not starting sequencer")
+        all_found = True
+        for mkey in self.config['motors']['wait_for']:
+            if mkey not in self.motors:
+                all_found = False
+                self.logger.debug("{} is NOT present".format(mkey))
+            else:
+                self.logger.debug("{} is PRESENT".format(mkey))
+        if not all_found:
             return
         self.sequence_reload()
 

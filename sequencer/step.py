@@ -20,6 +20,7 @@ class SequenceStep(LoggerMixin):
     def __init__(self, stepconfig, motors, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.config = stepconfig
+        self.config['dwell'] = float(self.config['dwell'])
         self.motors = motors
 
     @log_exceptions
@@ -56,11 +57,11 @@ class SequenceStep(LoggerMixin):
         if not self._motors_done():
             self.logger.debug("Waiting for motors to be done")
             return False
-        if float(self.config['dwell']) > 0:
+        if self.config['dwell'] > 0:
             if not self.dwell_started:
                 self.logger.debug("Motors done, starting {:0.2f}s dwell".format(self.config['dwell']))
                 self.dwell_started = time.time()
                 return False
-            if (time.time() - self.dwell_started) < float(self.config['dwell']):
+            if (time.time() - self.dwell_started) < self.config['dwell']:
                 return False
         return True
