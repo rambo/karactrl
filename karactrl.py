@@ -166,6 +166,8 @@ class KaraCRTL(ConfigMixin, ZMQMixin, TimersMixin):
             self.logger.debug("Don't know what to do with node {}".format(repr(node.node_identifier)))
             return
         strid = node.node_identifier.decode('ascii')
+        if strid in self.motors:
+            del self.motors[strid]
         self.motors[strid] = KaraMoottori(node, self.config['motors'], logger_name=self.logger_name)
         self.logger.info("Added motor {}".format(node.node_identifier))
 

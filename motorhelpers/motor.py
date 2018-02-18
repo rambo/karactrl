@@ -18,7 +18,11 @@ class KaraMoottori(LoggerMixin):
         self.config = config
         self.node = node
         self.name = self.node.node_identifier
+        self.logger.debug("self.node.rx_callbacks size before {}".format(len(self.node.rx_callbacks)))
         self.node.rx_callbacks.append(self.node_rx_callback)
+        self.logger.debug("{} rx callback is {}".format(self.name, self.node_rx_callback))
+        self.logger.debug("{} node is {}".format(self.name, self.node))
+        self.logger.debug("self.node.rx_callbacks size after {}".format(len(self.node.rx_callbacks)))
 
     @log_exceptions
     def node_rx_callback(self, packet, node):

@@ -22,6 +22,9 @@ class SequenceStep(LoggerMixin):
         self.config = stepconfig
         self.config['dwell'] = float(self.config['dwell'])
         self.motors = motors
+        for mkey in self.config['motors'].keys():
+            self.config['motors'][mkey][0] = float(self.config['motors'][mkey][0])
+            self.config['motors'][mkey][1] = float(self.config['motors'][mkey][1])
 
     @log_exceptions
     def start(self):
