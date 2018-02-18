@@ -29,12 +29,12 @@ class SequenceStep(LoggerMixin):
         self.started = time.time()
         for mkey in self.config['motors'].keys():
             if mkey not in self.motors:
-                self.logger.warning("Configured motor '{}' is not available".format(mkey))
+                self.logger.warning("Configured motor '{}' is NOT available".format(mkey))
                 continue
             motor = self.motors[mkey]
             pos, speed = self.config['motors'][mkey]
             if not motor.ready:
-                self.logger.warning("Motor '{}' is not ready".format(mkey))
+                self.logger.warning("Motor '{}' is NOT ready".format(mkey))
             motor.go_to(pos, speed)
 
     @log_exceptions
@@ -42,13 +42,13 @@ class SequenceStep(LoggerMixin):
         ret = True
         for mkey in self.config['motors'].keys():
             if mkey not in self.motors:
-                self.logger.warning("Configured motor '{}' is not available".format(mkey))
+                self.logger.warning("Configured motor '{}' is NOT available".format(mkey))
                 continue
             if not self.motors[mkey].ready:
                 self.logger.debug("{} is NOT ready".format(mkey))
                 ret = False
-                break
-            self.logger.debug("{} is ready".format(mkey))
+                continue
+            self.logger.debug("{} is READY".format(mkey))
         return ret
 
     @log_exceptions
@@ -58,7 +58,7 @@ class SequenceStep(LoggerMixin):
             return False
         if float(self.config['dwell']) > 0:
             if not self.dwell_started:
-                self.logger.debug("Motors done, starting {}s dwell".format(self.config['dwell']))
+                self.logger.debug("Motors done, starting {:0.2f}s dwell".format(self.config['dwell']))
                 self.dwell_started = time.time()
                 return False
             if (time.time() - self.dwell_started) < float(self.config['dwell']):

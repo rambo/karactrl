@@ -36,6 +36,8 @@ class KaraMoottori(LoggerMixin):
 
         if target_steps == current_steps:
             self.ready = True
+        else:
+            self.ready = False
 
         if data[:2] == b'MT':
             # Timed report
@@ -47,14 +49,25 @@ class KaraMoottori(LoggerMixin):
         if data[:2] == b'MS':
             # Stop callback
             self.ready = True
+            # We might have stopped in middle of homing.
+            if data[10]:
+                self.ready = False
+                self.homing = True
+            else:
+                self.homing = False
 
-        self.logger.debug("{}: Current position {}% ({}), target position {}% ({})".format(
+        if self.homing:
+            # Make extra damn sure
+            self.ready = False
+
+        self.logger.debug("{}: Current position {:0.2f}% ({}), target position {:0.2f}% ({})".format(
             self.name,
             self.current_pos,
             current_steps,
             self.target_pos,
             target_steps
         ))
+        self.logger.debug("{}: ready={} homing={}".format(self.name, int(self.ready), int(self.homing)))
 
     @log_exceptions
     def home(self):
@@ -66,6 +79,7 @@ class KaraMoottori(LoggerMixin):
     @log_exceptions
     def stop(self):
         """Send stop-command to node"""
+        self.ready = False
         self.node.tx_string(b"S")
 
     def hex_encode_uint16_t(self, input):
@@ -80,6 +94,9 @@ class KaraMoottori(LoggerMixin):
     def go_to(self, len_percent, speed_percent=None):
         """Move to position (given as percentage of full travel), if travel speed is not defined previous value held
         in the controller memory will be used"""
+        if self.homing:
+            self.logger.error("{} is still homing, not sending position command", self.name)
+            return False
         self.ready = False
         len_percent = float(len_percent)
         speed_percent = float(speed_percent)
@@ -89,9 +106,9 @@ class KaraMoottori(LoggerMixin):
             if pps < 1:
                 pps = 15
             msg = b"F" + self.hex_encode_uint16_t(pps)
-            self.logger.debug("{}: Sending {}, pps={}".format(self.name, msg, pps))
+            self.logger.debug("{}: Sending {}, pps={} ({:0.2f}%)".format(self.name, msg, pps, speed_percent))
             self.node.tx_string(msg)
         target_pos = int((self.config['max_steps'] / 100) * len_percent)
         msg = b"G" + self.hex_encode_int32_t(target_pos)
-        self.logger.debug("{}: Sending {}, target_pos={} ({}%)".format(self.name, msg, target_pos, len_percent))
+        self.logger.debug("{}: Sending {}, target_pos={} ({:0.2f}%)".format(self.name, msg, target_pos, len_percent))
         self.node.tx_string(msg)
