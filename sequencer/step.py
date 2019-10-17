@@ -20,9 +20,14 @@ class SequenceStep(LoggerMixin):
     def __init__(self, stepconfig, motors, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.config = stepconfig
+        if isinstance(self.config['dwell'], str):
+            self.config['dwell'] = self.config['dwell'].replace(',','.')
         self.config['dwell'] = float(self.config['dwell'])
         self.motors = motors
         for mkey in self.config['motors'].keys():
+            for idx in range(2):
+                if isinstance(self.config['motors'][mkey][idx], str):
+                    self.config['motors'][mkey][idx] = self.config['motors'][mkey][idx].replace(',','.')
             self.config['motors'][mkey][0] = float(self.config['motors'][mkey][0])
             self.config['motors'][mkey][1] = float(self.config['motors'][mkey][1])
 
