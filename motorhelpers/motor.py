@@ -102,6 +102,10 @@ class KaraMoottori(LoggerMixin):
             self.logger.error("{} is still homing, not sending position command", self.name)
             return False
         self.ready = False
+        if isinstance(len_percent, str):
+            len_percent = len_percent.replace(',','.')
+        if isinstance(speed_percent, str):
+            speed_percent = speed_percent.replace(',','.')
         len_percent = float(len_percent)
         speed_percent = float(speed_percent)
         if speed_percent:
