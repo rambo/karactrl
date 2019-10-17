@@ -125,8 +125,6 @@ class SequenceStep extends React.Component {
                 <Col md={12}>
                     <Row>
                         <Col md={4}><Motor id="Motor1" speed={this.props.m1speed} position={this.props.m1position} propagateChange={this.handleMotorChange} /></Col>
-                        <Col md={4}><Motor id="Motor2" speed={this.props.m2speed} position={this.props.m2position} propagateChange={this.handleMotorChange} /></Col>
-                        <Col md={4}><Motor id="Motor3" speed={this.props.m3speed} position={this.props.m3position} propagateChange={this.handleMotorChange} /></Col>
                     </Row>
                     <Row>
                         <Col md={6}>
@@ -205,9 +203,7 @@ class Main extends React.Component {
         seq_mod.steps.push({
             dwell: 0,
             motors: {
-                Motor1: [0,0],
-                Motor2: [0,0],
-                Motor3: [0,0]
+                Motor1: [0,0]
             }
         });
         this.setState({ sequence: seq_mod})
@@ -228,8 +224,6 @@ class Main extends React.Component {
                         stepno={index}
                         dwell={row.dwell}
                         m1speed={row.motors.Motor1[1]} m1position={row.motors.Motor1[0]}
-                        m2speed={row.motors.Motor2[1]} m2position={row.motors.Motor2[0]}
-                        m3speed={row.motors.Motor3[1]} m3position={row.motors.Motor3[0]}
                         propagateDwellChange={this.handleDwellChange}
                         propagateMotorChange={this.handleMotorChange}
                     />
