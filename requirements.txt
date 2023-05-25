@@ -1,5 +1,5 @@
 msgpack-python==0.4.8
 pyzmq==16.0.2
-tornado==4.4.2
+tornado==6.3.2
 XBee==2.2.5
 
